@@ -17,7 +17,7 @@ load_dotenv()
 
 app = Flask(__name__, static_url_path="")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://sql6584163:LhfpILmD32@sql6.freemysqlhosting.net:3306/sql6584163"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI", None)
 db = SQLAlchemy()
 db.init_app(app)
 
@@ -174,6 +174,8 @@ machine = TocMachine(
     auto_transitions=False,
     show_conditions=True,
 )
+
+machine.get_graph().draw("fsm_diagram.png", prog='dot')
 
 # get channel_secret and channel_access_token from your environment variable
 channel_secret = os.getenv("LINE_CHANNEL_SECRET", None)
