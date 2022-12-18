@@ -1,159 +1,86 @@
-# TOC Project 2020
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/dc7fa47fcd809b99d087/maintainability)](https://codeclimate.com/github/NCKU-CCS/TOC-Project-2020/maintainability)
-
-[![Known Vulnerabilities](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020/badge.svg)](https://snyk.io/test/github/NCKU-CCS/TOC-Project-2020)
-
-
-Template Code for TOC Project 2020
+# TOC Project 2022
+一個簡易的紀帳Line bot
 
 A Line bot based on a finite state machine
 
-More details in the [Slides](https://hackmd.io/@TTW/ToC-2019-Project#) and [FAQ](https://hackmd.io/s/B1Xw7E8kN)
-
-## Setup
-
 ### Prerequisite
-* Python 3.6
+* Python 3.9
 * Pipenv
-* Facebook Page and App
-* HTTPS Server
+* Line App
+* ngrok
 
-#### Install Dependency
+## Line Bot執行方式
+執行Line Bot服務
 ```sh
-pip3 install pipenv
-
-pipenv --three
-
-pipenv install
-
-pipenv shell
+cd /path/to/project/directory
+pipenv run python app.py
 ```
 
-* pygraphviz (For visualizing Finite State Machine)
-    * [Setup pygraphviz on Ubuntu](http://www.jianshu.com/p/a3da7ecc5303)
-	* [Note: macOS Install error](https://github.com/pygraphviz/pygraphviz/issues/100)
+開啟另一個終端機
 
-
-#### Secret Data
-You should generate a `.env` file to set Environment Variables refer to our `.env.sample`.
-`LINE_CHANNEL_SECRET` and `LINE_CHANNEL_ACCESS_TOKEN` **MUST** be set to proper values.
-Otherwise, you might not be able to run your code.
-
-#### Run Locally
-You can either setup https server or using `ngrok` as a proxy.
-
-#### a. Ngrok installation
-* [ macOS, Windows, Linux](https://ngrok.com/download)
-
-or you can use Homebrew (MAC)
-```sh
-brew cask install ngrok
-```
-
-**`ngrok` would be used in the following instruction**
-
+架設ngrok供外網連接
 ```sh
 ngrok http 8000
 ```
+該命令執行後，會產生一個網址
 
-After that, `ngrok` would generate a https URL.
+將該網址複製到Line bot project的webhook url裡
 
-#### Run the sever
+並在網址後接`/webhook`，line bot即可運作
 
+## Line Bot使用方式
+### 主選單
+將Line Bot加為好友後，隨意發送一個留言即可進入主選單狀態
 ```sh
-python3 app.py
+主選單命令:
+新增
+刪除
+修改
+查詢
 ```
+輸入以上其中一個命令，即可執行對應的功能
 
-#### b. Servo
+### 新增
+輸入`新增`後，Line bot會請求使用者輸入交易紀錄的日期、種類、名稱和金額
 
-Or You can use [servo](http://serveo.net/) to expose local servers to the internet.
+使用者必須根據Line bot提示的格式輸入訊息
 
+輸入完畢後，Line bot會回覆`新增成功`，並回到主選單
+
+### 刪除
+輸入`刪除`後，Line bot會請求使用者輸入欲刪除紀錄之日期
+
+接著，Line bot會列出該日所有交易紀錄，並請求使用者選擇刪除其中一筆紀錄
+
+選擇完畢後，Line bot會回覆`刪除成功`，並回到主選單
+
+若該日無任何紀錄，則Line bot會回覆`該日無任何紀錄`，並直接回到主選單
+
+### 修改
+輸入`修改`後，Line bot會請求使用者輸入欲修改紀錄之日期
+
+接著，Line bot會列出該日所有交易紀錄，並請求使用者選擇修改其中一筆紀錄
+
+選擇完畢後，Line bot會請求使用者輸入欲修改紀錄的日期、種類、名稱和金額
+
+修改完畢後，Line bot會回覆`修改成功`，並回到主選單
+
+若該日無任何紀錄，則Line bot會回覆`該日無任何紀錄`，並直接回到主選單
+
+### 查詢
+輸入`查詢`後，Line bot會請求使用者輸入欲查詢紀錄之日期
+
+接著，Line bot會列出該日所有交易紀錄，並回到主選單
+
+### 其他
+使用者傳送的訊息可能不符合Line bot的期待
+
+例如：不正確的日期格式、無法辨別的紀錄種類、過長的紀錄名稱、金額不是正整數、選擇一個不在列表範圍內的紀錄
+
+此時Line bot會回覆`此內容無效，請輸入正確的資訊`，提醒使用者再次輸入
 
 ## Finite State Machine
-![fsm](./img/show-fsm.png)
+![fsm](./fsm_diagram.png)
 
-## Usage
-The initial state is set to `user`.
-
-Every time `user` state is triggered to `advance` to another state, it will `go_back` to `user` state after the bot replies corresponding message.
-
-* user
-	* Input: "go to state1"
-		* Reply: "I'm entering state1"
-
-	* Input: "go to state2"
-		* Reply: "I'm entering state2"
-
-## Deploy
-Setting to deploy webhooks on Heroku.
-
-### Heroku CLI installation
-
-* [macOS, Windows](https://devcenter.heroku.com/articles/heroku-cli)
-
-or you can use Homebrew (MAC)
-```sh
-brew tap heroku/brew && brew install heroku
-```
-
-or you can use Snap (Ubuntu 16+)
-```sh
-sudo snap install --classic heroku
-```
-
-### Connect to Heroku
-
-1. Register Heroku: https://signup.heroku.com
-
-2. Create Heroku project from website
-
-3. CLI Login
-
-	`heroku login`
-
-### Upload project to Heroku
-
-1. Add local project to Heroku project
-
-	heroku git:remote -a {HEROKU_APP_NAME}
-
-2. Upload project
-
-	```
-	git add .
-	git commit -m "Add code"
-	git push -f heroku master
-	```
-
-3. Set Environment - Line Messaging API Secret Keys
-
-	```
-	heroku config:set LINE_CHANNEL_SECRET=your_line_channel_secret
-	heroku config:set LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token
-	```
-
-4. Your Project is now running on Heroku!
-
-	url: `{HEROKU_APP_NAME}.herokuapp.com/callback`
-
-	debug command: `heroku logs --tail --app {HEROKU_APP_NAME}`
-
-5. If fail with `pygraphviz` install errors
-
-	run commands below can solve the problems
-	```
-	heroku buildpacks:set heroku/python
-	heroku buildpacks:add --index 1 heroku-community/apt
-	```
-
-	refference: https://hackmd.io/@ccw/B1Xw7E8kN?type=view#Q2-如何在-Heroku-使用-pygraphviz
-
-## Reference
-[Pipenv](https://medium.com/@chihsuan/pipenv-更簡單-更快速的-python-套件管理工具-135a47e504f4) ❤️ [@chihsuan](https://github.com/chihsuan)
-
-[TOC-Project-2019](https://github.com/winonecheng/TOC-Project-2019) ❤️ [@winonecheng](https://github.com/winonecheng)
-
-Flask Architecture ❤️ [@Sirius207](https://github.com/Sirius207)
-
-[Line line-bot-sdk-python](https://github.com/line/line-bot-sdk-python/tree/master/examples/flask-echo)
+## 其他
+該Line bot的四項功能皆對同一個database的table做操作，而且會避免使用者們互相存取或修改其他人的紀錄。
